@@ -7,11 +7,13 @@ import Projects from './components/Projects'
 import Experience from './components/Experience'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
+import LottieAnimation from './components/LottieAnimation'
 
 function App() {
   const [darkMode, setDarkMode] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [botAnimationData, setBotAnimationData] = useState(null)
 
   useEffect(() => {
     const isDark = localStorage.getItem('darkMode') === 'true'
@@ -20,6 +22,14 @@ function App() {
     if (isDark) {
       document.documentElement.classList.add('dark')
     }
+  }, [])
+
+  // Load the bot animation
+  useEffect(() => {
+    fetch('/lottie/bot.json')
+      .then(response => response.json())
+      .then(data => setBotAnimationData(data))
+      .catch(error => console.log('Error loading bot animation:', error))
   }, [])
 
   useEffect(() => {
@@ -42,10 +52,19 @@ function App() {
   }
 
   const scrollToSection = (sectionId) => {
+    console.log('Scrolling to section:', sectionId) // Debug log
     const element = document.getElementById(sectionId)
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' })
+      // Close mobile menu first
       setMobileMenuOpen(false)
+      
+      // Small delay to ensure menu closes before scrolling
+      setTimeout(() => {
+        element.scrollIntoView({ behavior: 'smooth' })
+        console.log('Section found and scrolled') // Debug log
+      }, 100)
+    } else {
+      console.log('Section not found:', sectionId) // Debug log
     }
   }
 
@@ -57,16 +76,37 @@ function App() {
           ? 'bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-lg' 
           : 'bg-transparent'
       }`}>
-        <div className="container-custom">
+        <div className="container-custom px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="text-2xl font-bold text-gradient"
+              className="text-2xl font-bold text-gradient cursor-pointer hover:opacity-80 transition-opacity duration-200"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             >
               Saikat
             </motion.div>
+
+            {/* Bot Animation - Only show when scrolled */}
+            <AnimatePresence>
+              {scrolled && botAnimationData && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ duration: 0.3 }}
+                  className="mt-5"
+                >
+                  <LottieAnimation
+                    animationData={botAnimationData}
+                    className="w-16 h-16 sm:w-20 sm:h-20"
+                    loop={true}
+                    autoplay={true}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
@@ -125,14 +165,14 @@ function App() {
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.3 }}
-                className="md:hidden overflow-hidden"
+                className="md:hidden overflow-hidden bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-700 absolute top-full left-0 right-0 z-50"
               >
-                <div className="py-4 space-y-2">
+                <div className="py-4 px-4 space-y-2">
                   {['about', 'skills', 'projects', 'experience', 'contact'].map((item) => (
                     <button
                       key={item}
                       onClick={() => scrollToSection(item)}
-                      className="block w-full text-left px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200 capitalize rounded-lg"
+                      className="block w-full text-left px-4 sm:px-6 py-3 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 capitalize rounded-lg font-medium text-base sm:text-lg"
                     >
                       {item}
                     </button>
