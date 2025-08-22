@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import emailjs from '@emailjs/browser'
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -10,27 +11,56 @@ const Contact = () => {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [error, setError] = useState('')
+
+  // Initialize EmailJS
+  useEffect(() => {
+    emailjs.init(import.meta.env.VITE_EMAILJS_PUBLIC_KEY )
+  }, [])
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     })
+    // Clear error when user starts typing
+    if (error) setError('')
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
+    setError('')
     
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    setIsSubmitting(false)
-    setIsSubmitted(true)
-    setFormData({ name: '', email: '', subject: '', message: '' })
-    
-    // Reset success message after 3 seconds
-    setTimeout(() => setIsSubmitted(false), 3000)
+    try {
+      // Prepare template parameters
+      const templateParams = {
+        from_name: formData.name,
+        from_email: formData.email,
+        subject: formData.subject,
+        message: formData.message,
+        to_name: 'Saikat Barua'
+      }
+
+      // Send email using EmailJS
+      const response = await emailjs.send(
+        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+        templateParams
+      )
+
+      if (response.status === 200) {
+        setIsSubmitted(true)
+        setFormData({ name: '', email: '', subject: '', message: '' })
+        // Reset success message after 5 seconds
+        setTimeout(() => setIsSubmitted(false), 5000)
+      }
+    } catch (error) {
+      console.error('Email sending failed:', error)
+      setError('Failed to send message. Please try again or contact me directly via email.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const contactInfo = [
@@ -229,6 +259,29 @@ const Contact = () => {
             <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">
               Send a Message
             </h3>
+            
+            {/* EmailJS Configuration Notice */}
+            {(!import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 
+              !import.meta.env.VITE_EMAILJS_SERVICE_ID || 
+              !import.meta.env.VITE_EMAILJS_TEMPLATE_ID) && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg"
+              >
+                <div className="flex items-center space-x-2 text-yellow-700 dark:text-yellow-300">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                  <span className="text-sm">
+                    EmailJS not configured. Please check the setup guide or contact me directly at{' '}
+                    <a href="mailto:code.saikat7@gmail.com" className="underline hover:text-yellow-800 dark:hover:text-yellow-200">
+                      code.saikat7@gmail.com
+                    </a>
+                  </span>
+                </div>
+              </motion.div>
+            )}
 
             {isSubmitted ? (
               <motion.div
@@ -312,6 +365,21 @@ const Contact = () => {
                     placeholder="Tell me about your project or just say hello!"
                   />
                 </div>
+
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"
+                  >
+                    <div className="flex items-center space-x-2 text-red-700 dark:text-red-300">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-sm">{error}</span>
+                    </div>
+                  </motion.div>
+                )}
 
                 <button
                   type="submit"

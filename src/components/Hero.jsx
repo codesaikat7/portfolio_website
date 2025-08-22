@@ -53,7 +53,7 @@ const Hero = ({ scrolled = false }) => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-2xl md:text-3xl text-gray-700 dark:text-gray-300 mb-4"
+              className="text-2xl md:text-3xl text-gray-700 dark:text-gray-300 mb-4 px-4 sm:px-6 lg:px-0"
             >
               Software Engineer
             </motion.h2>
@@ -63,7 +63,7 @@ const Hero = ({ scrolled = false }) => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="text-lg text-gray-600 dark:text-gray-400 mb-6 max-w-2xl mx-auto lg:mx-0 leading-relaxed"
+              className="text-lg text-gray-600 dark:text-gray-400 mb-6 max-w-2xl mx-auto lg:mx-0 leading-relaxed px-4 sm:px-6 lg:px-0"
             >
               I build exceptional digital experiences with modern technologies. 
               Passionate about creating scalable solutions and writing clean, maintainable code.
@@ -74,7 +74,7 @@ const Hero = ({ scrolled = false }) => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start mb-6 px-2 sm:px-0"
+              className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start mb-6 px-6 sm:px-8 lg:px-0"
             >
               <button 
                 onClick={() => scrollToSection('contact')}
