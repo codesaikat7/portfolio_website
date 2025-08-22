@@ -65,7 +65,6 @@ const Hero = ({ scrolled = false }) => {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="text-lg text-gray-600 dark:text-gray-400 mb-6 max-w-2xl mx-auto lg:mx-0 leading-relaxed px-4 sm:px-6 lg:px-0"
             >
-              I build exceptional digital experiences with modern technologies. 
               Passionate about creating scalable solutions and writing clean, maintainable code.
             </motion.p>
 
