@@ -138,6 +138,71 @@ const Chatbot = ({ isOpen, onToggle, darkMode }) => {
     "How can I contact you?"
   ]
 
+
+
+  // Render message content with proper formatting
+  const renderMessageContent = (content) => {
+    // Better URL detection that handles commas and punctuation
+    const urlRegex = /(https?:\/\/[^\s,]+)/g
+    
+    // Platform name mapping
+    const getPlatformName = (url) => {
+      const cleanUrl = url.toLowerCase()
+      if (cleanUrl.includes('github.com')) return 'GitHub'
+      if (cleanUrl.includes('linkedin.com')) return 'LinkedIn'
+      if (cleanUrl.includes('instagram.com')) return 'Instagram'
+      if (cleanUrl.includes('twitter.com') || cleanUrl.includes('x.com')) return 'Twitter/X'
+      if (cleanUrl.includes('facebook.com')) return 'Facebook'
+      if (cleanUrl.includes('youtube.com')) return 'YouTube'
+      if (cleanUrl.includes('behance.net')) return 'Behance'
+      if (cleanUrl.includes('dribbble.com')) return 'Dribbble'
+      
+      // Default: extract domain name
+      const domain = url.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0]
+      return domain
+    }
+    
+    // Find all URLs in the content
+    const urls = content.match(urlRegex) || []
+    
+    // Replace URLs with placeholders first
+    let processedContent = content
+    const urlMap = new Map()
+    
+    urls.forEach((url, index) => {
+      const placeholder = `__URL_${index}__`
+      urlMap.set(placeholder, url)
+      processedContent = processedContent.replace(url, placeholder)
+    })
+    
+    // Split by placeholders
+    const parts = processedContent.split(/(__URL_\d+__)/)
+    
+    return parts.map((part, index) => {
+      if (part.startsWith('__URL_') && part.endsWith('__')) {
+        // This is a URL placeholder - render the actual URL
+        const originalUrl = urlMap.get(part)
+        const cleanUrl = originalUrl.replace(/[,.]$/, '')
+        const platformName = getPlatformName(cleanUrl)
+        
+        return (
+          <span key={index} className="inline-block">
+            <a 
+              href={cleanUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-blue-600 dark:text-blue-400 hover:underline break-all"
+            >
+              {platformName}
+            </a>
+          </span>
+        )
+      }
+      // Regular text
+      return <span key={index}>{part}</span>
+    })
+  }
+
   const findBestResponse = (question) => {
     const lowerQuestion = question.toLowerCase()
     
@@ -295,16 +360,18 @@ const Chatbot = ({ isOpen, onToggle, darkMode }) => {
                 initial={{ opacity: 0, y: 5 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.2, ease: "easeOut" }}
-                className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'} w-full`}
               >
                 <div
-                  className={`max-w-[85%] sm:max-w-[80%] p-2.5 sm:p-3 rounded-2xl ${
+                  className={`max-w-[85%] sm:max-w-[80%] min-w-0 w-fit p-2.5 sm:p-3 rounded-2xl ${
                     message.type === 'user'
                       ? 'bg-blue-500 text-white rounded-br-md'
                       : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-bl-md'
                   }`}
                 >
-                  <p className="text-xs sm:text-sm leading-relaxed">{message.content}</p>
+                  <div className="text-xs sm:text-sm leading-relaxed break-words whitespace-pre-wrap overflow-hidden">
+                    {renderMessageContent(message.content)}
+                  </div>
                   <p className={`text-xs mt-1.5 sm:mt-2 ${
                     message.type === 'user' ? 'text-blue-100' : 'text-gray-500 dark:text-gray-400'
                   }`}>
