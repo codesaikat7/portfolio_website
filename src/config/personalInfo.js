@@ -38,7 +38,7 @@ export const PERSONAL_INFO = {
     email: "code.saikat7@gmail.com",
     phone: "+91 8597430895",
     location: "Bengaluru, Karnataka, India",
-    responseTime: "24 hours",
+    responseTime: "2 hours",
     availability: "Open to discussing new opportunities and collaborations"
   },
   

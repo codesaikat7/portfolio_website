@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { groqService } from '../services/groqService'
+import { PERSONAL_INFO, skills, education, experience, contact, about, social } from '../config/personalInfo.js'
+import { experienceData, skillsData } from '../data/experienceData.jsx'
 
 // Audio context for playing sounds
 let audioContext = null
@@ -11,7 +13,7 @@ const Chatbot = ({ isOpen, onToggle, darkMode }) => {
     {
       id: 1,
       type: 'bot',
-      content: "Hi! I'm Saikat's AI assistant. I can answer questions about his background, skills, experience, and projects. What would you like to know?",
+      content: "Hi! I'm Saikat's AI assistant. I can answer questions about my background, skills, experience, and projects. What would you like to know?",
       timestamp: new Date()
     }
   ])
@@ -28,9 +30,9 @@ const Chatbot = ({ isOpen, onToggle, darkMode }) => {
       try {
         audioContext = new (window.AudioContext || window.webkitAudioContext)()
         createNotificationSound()
-      } catch (error) {
-        console.log('Audio context not supported:', error)
-      }
+          } catch (error) {
+      // Audio context not supported in this browser
+    }
     }
   }, [])
 
@@ -54,7 +56,7 @@ const Chatbot = ({ isOpen, onToggle, darkMode }) => {
 
       audioBuffer = buffer
     } catch (error) {
-      console.log('Error creating notification sound:', error)
+      // Error creating notification sound
     }
   }
 
@@ -68,7 +70,7 @@ const Chatbot = ({ isOpen, onToggle, darkMode }) => {
       source.connect(audioContext.destination)
       source.start(0)
     } catch (error) {
-      console.log('Error playing notification sound:', error)
+      // Error playing notification sound
     }
   }
 
@@ -103,28 +105,28 @@ const Chatbot = ({ isOpen, onToggle, darkMode }) => {
     }
   }, [isOpen, onToggle])
 
-  // Knowledge base about Saikat
+  // Enhanced knowledge base about Saikat using actual data
   const knowledgeBase = {
     background: {
-      education: "I have a B.Sc. in Mathematics and an M.C.A (Master of Computer Applications) degree.",
-      location: "I'm based in Bengaluru, Karnataka, India.",
-      availability: "I'm currently available for new opportunities - full-time, contract, and freelance work.",
-      experience: "I have 3+ years of experience in software development."
+      education: education?.degree || "I have a B.Sc. in Mathematics and an M.C.A (Master of Computer Applications) degree.",
+      location: contact?.location || "I'm based in Bengaluru, Karnataka, India.",
+      availability: contact?.availability || "I'm currently available for new opportunities - full-time, contract, and freelance work.",
+      experience: `${experienceData?.workExperience?.length || 3}+ years of experience in software development.`
     },
     skills: {
-      technical: "I'm proficient in 15+ technologies including React, Node.js, Python, JavaScript, and various modern web technologies.",
-      soft: "I have strong problem-solving skills, excellent communication, and I'm a team player who loves learning new technologies.",
+      technical: `I'm proficient in various technologies including ${skills?.technical?.slice(0, 6).join(', ')} and more.`,
+      soft: `I have strong ${skills?.soft?.slice(0, 3).join(', ')} abilities and excellent communication skills.`,
       learning: "I'm always expanding my skill set and staying updated with the latest industry trends."
     },
     projects: {
       portfolio: "This portfolio showcases my skills and projects. I built it using React, Tailwind CSS, and Framer Motion.",
-      experience: "I've worked on various projects including web applications, APIs, and full-stack solutions.",
-      github: "You can find more of my work on my GitHub profile."
+      experience: `I've worked on various projects including ${experienceData?.workExperience?.[0]?.description || 'web applications, APIs, and full-stack solutions'}.`,
+      github: `You can find more of my work on my GitHub profile (${social?.github?.username}).`
     },
     contact: {
-      email: "Feel free to reach out via email or LinkedIn for professional inquiries.",
-      availability: "I'm open to discussing new opportunities and collaborations.",
-      response: "I typically respond to professional inquiries within 24 hours."
+      email: `Feel free to reach out via email (${contact?.email}) or LinkedIn (${social?.linkedin?.username}) for professional inquiries.`,
+      availability: contact?.availability || "I'm open to discussing new opportunities and collaborations.",
+      response: `I typically respond to professional inquiries within ${contact?.responseTime || '24 hours'}.`
     }
   }
 
@@ -159,7 +161,7 @@ const Chatbot = ({ isOpen, onToggle, darkMode }) => {
     }
     
     // Default response for other questions
-    return "That's an interesting question! While I can provide general information about Saikat's background, skills, and experience, for specific technical details or detailed project discussions, I'd recommend reaching out to him directly. Is there something specific about his background or skills you'd like to know?"
+    return "That's an interesting question! While I can provide general information about my background, skills, and experience, for specific technical details or detailed project discussions, I'd recommend reaching out to me directly. Is there something specific about my background or skills you'd like to know?"
   }
 
   const handleSendMessage = async (message = inputValue) => {
@@ -270,6 +272,8 @@ const Chatbot = ({ isOpen, onToggle, darkMode }) => {
                   </svg>
                 )}
               </button>
+
+
               
               {/* Close Button */}
               <button

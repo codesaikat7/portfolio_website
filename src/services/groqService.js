@@ -1,56 +1,100 @@
 // Groq API Service for AI-powered chatbot responses
 // You'll need to get an API key from https://console.groq.com/
 
+import { PERSONAL_INFO, skills, education, experience, contact, about, social } from '../config/personalInfo.js'
+import { experienceData, skillsData } from '../data/experienceData.jsx'
+
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
 
-// Knowledge base about Saikat for context
-const SAIKAT_CONTEXT = `
-You are Saikat's AI assistant. You help recruiters and visitors learn about Saikat's background, skills, and experience.
+// Dynamic knowledge base about Saikat using actual data
+const createDynamicContext = () => {
+  const workExp = experienceData?.workExperience || []
+  const edu = experienceData?.education || []
+  const certs = experienceData?.certifications || []
+  const skillCats = skillsData?.skillCategories || []
+  
+  // Safe array operations with fallbacks
+  const languages = about?.languages 
+  const softSkills = skills?.soft || ['Problem Solving', 'Communication', 'Team Work']
+  const interests = about?.interests || ['Technology', 'Learning', 'Innovation']
+  const workTypes = contact?.workTypes || ['Full-time', 'Contract', 'Freelance']
+  
+  return `You are Saikat's AI assistant. CRITICAL: When responding, ALWAYS speak in FIRST PERSON as if you ARE Saikat speaking directly to the recruiter. 
 
-Here's what you know about Saikat:
+IMPORTANT: 
+- Use "I", "me", "my", "mine" - NEVER use "he", "his", "him", "Saikat's"
+- Example: Say "I have experience in React" NOT "Saikat has experience in React"
+- Example: Say "My skills include..." NOT "His skills include..."
+- Example: Say "I worked at..." NOT "He worked at..."
 
-BACKGROUND:
-- Education: B.Sc. in Mathematics and M.C.A (Master of Computer Applications)
-- Location: Bengaluru, Karnataka, India
-- Experience: 3+ years in software development
-- Availability: Currently available for new opportunities (full-time, contract, freelance)
+Here's comprehensive information about me (Saikat):
+
+PERSONAL BACKGROUND:
+- Name: ${PERSONAL_INFO?.name || 'Saikat'}
+- Title: ${PERSONAL_INFO?.title || 'Software Developer'}
+- Location: ${contact?.location || 'Bengaluru, Karnataka, India'}
+- Email: ${contact?.email || 'code.saikat7@gmail.com'}
+- Phone: ${contact?.phone || '+91 8597430895'}
+- Languages: ${languages.join(', ')}
+- Summary: ${about?.summary || 'Passionate software developer with experience in modern web technologies.'}
+
+EDUCATION:
+${edu.length > 0 ? edu.map(ed => `- ${ed.degree} from ${ed.institution}, location: ${ed.location}, Description: ${ed.description} , Duration:(${ed.duration})`).join('\n') : '- B.Sc. in Mathematics and M.C.A (Master of Computer Applications)'}
+
+WORK EXPERIENCE:
+${workExp.length > 0 ? workExp.map(exp => `- ${exp.role || 'Role'} at ${exp.company || 'Company'} (${exp.duration || 'Duration'})
+  * ${exp.description || 'Description'}
+  * Technologies: ${exp.technologies?.join(', ') || 'Various technologies'}
+  * Key achievements: ${exp.achievements?.join(', ') || 'Multiple achievements'}`).join('\n\n') : '- Various software development projects and web applications'}
 
 TECHNICAL SKILLS:
-- Proficient in 15+ technologies including React, Node.js, Python, JavaScript
-- Full-stack development experience
-- Modern web technologies and frameworks
-- Always learning and expanding skills
+${skillCats.length > 0 ? skillCats.map(cat => `${cat.title || 'Category'}:
+${cat.skills?.map(skill => `- ${skill.name || 'Skill'}: ${skill.level || 0}% proficiency`).join('\n') || '- Various technologies'}`).join('\n\n') : '- Proficient in React, Node.js, Python, JavaScript, and modern web technologies'}
 
-PROJECTS & WORK:
-- Portfolio website (built with React, Tailwind CSS, Framer Motion)
-- Various web applications and APIs
-- Full-stack solutions
-- GitHub profile with more projects
+CERTIFICATIONS:
+${certs.length > 0 ? certs.map(cert => `- ${cert.name || 'Certification'} (${cert.issuer || 'Issuer'}) - ${cert.credential || 'Credential'}`).join('\n') : '- Various professional certifications and continuous learning'}
 
-SOFT SKILLS:
-- Strong problem-solving abilities
-- Excellent communication
-- Team player
-- Passionate about learning new technologies
+ADDITIONAL SKILLS:
+- Soft Skills: ${softSkills.join(', ')}
+- Interests: ${interests.join(', ')}
 
 CONTACT & AVAILABILITY:
-- Open to discussing new opportunities
-- Responds to professional inquiries within 24 hours
-- Available for full-time, contract, and freelance work
+- Response Time: ${contact?.responseTime || '24 hours'}
+- Availability: ${contact?.availability || 'Currently available for new opportunities'}
+- Work Types: ${workTypes.join(', ')}
+- Social Media: GitHub (${social?.github?.username || 'saikat'}), LinkedIn (${social?.linkedin?.username || 'saikat'})
 
-IMPORTANT: Always be professional, helpful, and accurate. If you don't know something specific, suggest reaching out to Saikat directly. Keep responses concise but informative.
-`
+CRITICAL INSTRUCTIONS:
+1. ALWAYS speak in FIRST PERSON as if you ARE Saikat - use "I", "me", "my", "mine"
+2. NEVER use third person (he/his/him) - this is crucial for consistency
+3. NEVER say "Saikat has..." or "Saikat's..." - say "I have..." or "My..."
+4. Always be professional, helpful, and accurate
+5. Use specific details from the data above when answering questions
+6. If asked about specific technologies, mention proficiency levels
+7. For work experience questions, provide detailed project information
+8. Include relevant certifications when discussing qualifications
+9. Keep responses informative but concise
+10. If you don't know something specific, suggest reaching out to me directly
+11. Always maintain a professional tone suitable for recruiters`
+}
+
+const SAIKAT_CONTEXT = createDynamicContext()
 
 export class GroqService {
   constructor() {
     this.apiKey = GROQ_API_KEY
-    this.isAvailable = this.apiKey 
+    // Check if API key is properly configured (not undefined, null, or placeholder)
+    this.isAvailable = this.apiKey && 
+                      this.apiKey !== 'undefined' && 
+                      this.apiKey !== 'null' && 
+                      this.apiKey.trim() !== ''
+    
+
   }
 
   async generateResponse(userQuestion) {
     if (!this.isAvailable) {
-      console.warn('Groq API key not configured. Using fallback responses.')
       return this.getFallbackResponse(userQuestion)
     }
 
@@ -87,34 +131,60 @@ export class GroqService {
       const data = await response.json()
       return data.choices[0]?.message?.content || 'I apologize, but I encountered an error. Please try asking your question again.'
     } catch (error) {
-      console.error('Error calling Groq API:', error)
       return this.getFallbackResponse(userQuestion)
     }
   }
 
   getFallbackResponse(question) {
-    // Fallback responses when Groq API is not available
+    // Fallback responses when Groq API is not available, using dynamic data
     const lowerQuestion = question.toLowerCase()
     
     if (lowerQuestion.includes('background') || lowerQuestion.includes('education') || lowerQuestion.includes('degree')) {
-      return "I have a B.Sc. in Mathematics and an M.C.A (Master of Computer Applications) degree. I'm based in Bengaluru, Karnataka, India."
-    }
-    if (lowerQuestion.includes('skill') || lowerQuestion.includes('technology') || lowerQuestion.includes('tech')) {
-      return "I'm proficient in 15+ technologies including React, Node.js, Python, JavaScript, and various modern web technologies. I have strong problem-solving skills and excellent communication abilities."
-    }
-    if (lowerQuestion.includes('project') || lowerQuestion.includes('work') || lowerQuestion.includes('experience')) {
-      return "I've worked on various projects including web applications, APIs, and full-stack solutions. This portfolio showcases my skills and was built using React, Tailwind CSS, and Framer Motion."
-    }
-    if (lowerQuestion.includes('available') || lowerQuestion.includes('opportunity') || lowerQuestion.includes('hire')) {
-      return "I'm currently available for new opportunities - full-time, contract, and freelance work. I'm open to discussing new collaborations and exciting projects."
-    }
-    if (lowerQuestion.includes('contact') || lowerQuestion.includes('email') || lowerQuestion.includes('reach')) {
-      return "Feel free to reach out via email or LinkedIn for professional inquiries. I typically respond to professional inquiries within 24 hours."
-    }
-    if (lowerQuestion.includes('experience') || lowerQuestion.includes('years')) {
-      return "I have 3+ years of experience in software development, working with various technologies and frameworks. I've contributed to multiple projects and have experience in both frontend and backend development."
+      const edu = experienceData?.education || []
+      const eduInfo = edu.length > 0 ? edu.map(ed => `${ed.degree || 'Degree'} from ${ed.institution || 'Institution'}`).join(' and ') : 'B.Sc. in Mathematics and M.C.A (Master of Computer Applications)'
+      return `I have ${eduInfo}. I'm based in ${contact?.location || 'Bengaluru, Karnataka, India'}. ${about?.summary || 'I am a passionate software developer with experience in modern web technologies.'}`
     }
     
+    if (lowerQuestion.includes('skill') || lowerQuestion.includes('technology') || lowerQuestion.includes('tech')) {
+      const skillCats = skillsData?.skillCategories || []
+      const topSkills = skillCats.length > 0 ? 
+        skillCats.flatMap(cat => cat.skills?.slice(0, 3) || []).map(s => s.name || 'Technology').slice(0, 6) : 
+        ['React', 'Node.js', 'Python', 'JavaScript', 'HTML', 'CSS']
+      const softSkills = skills?.soft?.slice(0, 3) || ['Problem Solving', 'Communication', 'Team Work']
+      return `I'm proficient in various technologies including ${topSkills.join(', ')} and more. I have strong ${softSkills.join(', ')} abilities.`
+    }
+    
+    if (lowerQuestion.includes('project') || lowerQuestion.includes('work') || lowerQuestion.includes('experience')) {
+      const workExp = experienceData?.workExperience || []
+      const recentExp = workExp[0] || {}
+      return `I've worked on various projects including ${recentExp.description || 'web applications, APIs, and full-stack solutions'}. This portfolio showcases my skills and was built using React, Tailwind CSS, and Framer Motion.`
+    }
+    
+    if (lowerQuestion.includes('available') || lowerQuestion.includes('opportunity') || lowerQuestion.includes('hire')) {
+      return `${contact?.availability || 'I am currently available for new opportunities'}. I'm open to discussing new collaborations and exciting projects. I typically respond to professional inquiries within ${contact?.responseTime || '24 hours'}.`
+    }
+    
+    if (lowerQuestion.includes('contact') || lowerQuestion.includes('email') || lowerQuestion.includes('reach')) {
+      return `Feel free to reach out via email (${contact?.email || 'saikat@example.com'}) or LinkedIn (${social?.linkedin?.username || 'saikat'}) for professional inquiries. I typically respond to professional inquiries within ${contact?.responseTime || '24 hours'}.`
+    }
+    
+    if (lowerQuestion.includes('experience') || lowerQuestion.includes('years')) {
+      const workExp = experienceData?.workExperience || []
+      const totalExp = workExp.length
+      const interests = about?.interests?.slice(0, 3) || ['Technology', 'Learning', 'Innovation']
+      return `I have experience working with various technologies and frameworks. I've contributed to multiple projects and have experience in both frontend and backend development. I'm passionate about ${interests.join(', ')}.`
+    }
+    
+    if (lowerQuestion.includes('certification') || lowerQuestion.includes('certificate')) {
+      const certs = experienceData.certifications || []
+      if (certs.length > 0) {
+        const certList = certs.map(cert => `${cert.name} from ${cert.issuer}`).join(', ')
+        return `I have several certifications including ${certList}. These demonstrate my commitment to continuous learning and professional development.`
+      }
+      return "I'm committed to continuous learning and professional development, regularly updating my skills and staying current with industry best practices."
+    }
+    
+    // Default response for other questions
     return "That's an interesting question! While I can provide general information about my background, skills, and experience, for specific technical details or detailed project discussions, I'd recommend reaching out to me directly. Is there something specific about my background or skills you'd like to know?"
   }
 
@@ -123,13 +193,9 @@ export class GroqService {
     return this.isAvailable
   }
 
-  // Get API status for debugging
-  getStatus() {
-    return {
-      isAvailable: this.isAvailable,
-      hasApiKey: !!this.apiKey,
-      apiKeyConfigured: this.apiKey !== 'your-groq-api-key-here'
-    }
+  // Check if Groq API is properly configured
+  isConfigured() {
+    return this.isAvailable
   }
 }
 
