@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import profilePic from '../assets/images/profile_pic.jpeg'
 import setup from '../assets/images/setup.jpeg'
+import { stats, contact, about, education } from '../config/personalInfo'
 
 const About = () => {
   const downloadResume = () => {
@@ -8,11 +9,6 @@ const About = () => {
     // For now, we'll just show an alert
     alert('Resume download functionality would be implemented here')
   }
-
-  const stats = [
-    { label: 'Years of Experience', value: '3+' },
-    { label: 'Technologies', value: '15+' },
-  ]
 
   return (
     <section id="about" className="section-padding bg-gray-50 dark:bg-gray-800">
@@ -62,27 +58,27 @@ const About = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                <span>Bengaluru, Karnataka, India</span>
+                <span>{contact.location}</span>
               </div>
               <div className="flex items-center space-x-3 text-gray-600 dark:text-gray-400">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <span>Available for new opportunities</span>
+                <span>{contact.availability}</span>
               </div>
               <div className="flex items-center space-x-3 text-gray-600 dark:text-gray-400">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V8a2 2 0 00-2-2z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <span>Full-time, Contract, Freelance</span>
+                <span>{contact.workTypes?.join(', ') || 'Full-time, Contract, Freelance'}</span>
               </div>
               <div className="flex items-center space-x-3 text-gray-600 dark:text-gray-400">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.078 0 01.665-6.479L12 14z" />
                 </svg>
-                <span>B.Sc. Mathematics + M.C.A</span>
+                <span>{education?.degree || 'B.Sc. Mathematics + M.C.A'}</span>
               </div>
             </div>
 
@@ -111,9 +107,7 @@ const About = () => {
                 Who I Am
               </h3>
               <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                I'm a passionate software engineer with a love for creating elegant solutions to complex problems. 
-                With over 3 years of experience in full-stack development, I've worked on a variety of projects 
-                ranging from web applications to mobile apps and backend services.
+                {about.summary}
               </p>
               <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
                 My journey in tech started with curiosity and has evolved into a career built on continuous learning. 
@@ -157,6 +151,27 @@ const About = () => {
                   </div>
                 </motion.div>
               ))}
+            </div>
+
+            {/* Languages */}
+            <div className="space-y-4 pt-6">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                Languages I Speak
+              </h3>
+              <div className="flex flex-wrap gap-3">
+                {about.languages.map((language, index) => (
+                  <motion.div
+                    key={language}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.4, delay: 0.8 + index * 0.1 }}
+                    viewport={{ once: true }}
+                    className="px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium border border-blue-200 dark:border-blue-800"
+                  >
+                    {language}
+                  </motion.div>
+                ))}
+              </div>
             </div>
           </motion.div>
         </div>
