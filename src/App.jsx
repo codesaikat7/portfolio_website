@@ -16,10 +16,12 @@ function App() {
   const [botAnimationData, setBotAnimationData] = useState(null)
 
   useEffect(() => {
-    const isDark = localStorage.getItem('darkMode') === 'true'
-    setDarkMode(isDark)
+    const isDark = localStorage.getItem('darkMode')
+    // Default to dark mode if no preference is stored
+    const shouldUseDarkMode = isDark === null ? true : isDark === 'true'
+    setDarkMode(shouldUseDarkMode)
     
-    if (isDark) {
+    if (shouldUseDarkMode) {
       document.documentElement.classList.add('dark')
     }
   }, [])
