@@ -8,12 +8,14 @@ import Experience from './components/Experience'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
 import LottieAnimation from './components/LottieAnimation'
+import Chatbot from './components/Chatbot'
 
 function App() {
   const [darkMode, setDarkMode] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [botAnimationData, setBotAnimationData] = useState(null)
+  const [chatbotOpen, setChatbotOpen] = useState(false)
 
   useEffect(() => {
     const isDark = localStorage.getItem('darkMode')
@@ -34,6 +36,8 @@ function App() {
       .catch(error => console.log('Error loading bot animation:', error))
   }, [])
 
+
+
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50)
@@ -51,6 +55,10 @@ function App() {
     } else {
       document.documentElement.classList.remove('dark')
     }
+  }
+
+  const toggleChatbot = () => {
+    setChatbotOpen(!chatbotOpen)
   }
 
   const scrollToSection = (sectionId) => {
@@ -98,7 +106,9 @@ function App() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
                   transition={{ duration: 0.3 }}
-                  className="mt-5"
+                  className="mt-5 cursor-pointer group"
+                  onClick={toggleChatbot}
+                  title="Chat with Saikat's AI Assistant"
                 >
                   <LottieAnimation
                     animationData={botAnimationData}
@@ -106,6 +116,15 @@ function App() {
                     loop={true}
                     autoplay={true}
                   />
+                  
+                  {/* Hover hint for header bot */}
+                  <motion.div
+                    className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                  >
+                    <div className="bg-white/90 dark:bg-gray-800/90 px-2 py-1 rounded-full shadow-lg">
+                      <span className="text-xs font-medium text-gray-700 dark:text-gray-300">💬</span>
+                    </div>
+                  </motion.div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -188,7 +207,7 @@ function App() {
 
       {/* Main Content */}
       <main>
-        <Hero />
+        <Hero onBotClick={toggleChatbot} />
         <About />
         <Skills />
         <Projects />
@@ -197,6 +216,13 @@ function App() {
       </main>
 
       <Footer />
+      
+      {/* Chatbot Component */}
+      <Chatbot 
+        isOpen={chatbotOpen} 
+        onToggle={toggleChatbot} 
+        darkMode={darkMode} 
+      />
     </div>
   )
 }

@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import LottieAnimation from './LottieAnimation'
 import { AnimatePresence } from 'framer-motion'
 
-const Hero = ({ scrolled = false }) => {
+const Hero = ({ scrolled = false, onBotClick }) => {
   const [botAnimationData, setBotAnimationData] = useState(null)
 
   // Load the bot animation
@@ -137,7 +137,7 @@ const Hero = ({ scrolled = false }) => {
                 transition={{ duration: 0.8, delay: 0.2 }}
                 className="flex-1 flex justify-center lg:justify-end"
               >
-                <div className="w-80 h-80 lg:w-96 lg:h-96">
+                <div className="w-80 h-80 lg:w-96 lg:h-96 relative group cursor-pointer" onClick={onBotClick}>
                   <motion.p
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -157,6 +157,17 @@ const Hero = ({ scrolled = false }) => {
                     loop={true}
                     autoplay={true}
                   />
+                  
+                  {/* Subtle click hint on hover */}
+                  <motion.div
+                    className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  >
+                    <div className="bg-white/90 dark:bg-gray-800/90 px-4 py-2 rounded-full shadow-lg">
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Click to chat!</span>
+                    </div>
+                  </motion.div>
+                  
+
                 </div>
               </motion.div>
             )}
